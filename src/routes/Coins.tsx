@@ -1,15 +1,39 @@
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 
-const Container = styled.div``;
+const Container = styled.div`
+  padding: 0 20px;
+`;
 
-const Header = styled.header``;
+const Header = styled.header`
+  height: 10vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
 
 const CoinList = styled.ul``;
 
-const Coin = styled.li``;
+const Coin = styled.li`
+  background-color: white;
+  color: ${props => props.theme.bgColor};
+  margin-bottom: 10px;
+  /* padding: 20px; */
+  border-radius: 15px;
+  cursor: pointer;
+  a {
+    transition: color 0.2s ease-in;
+    display: block;
+    padding: 20px;
+  }
+  &:hover {
+    color: ${props => props.theme.accentColor};
+  }
+`;
 
 const Title = styled.h1`
-  color: ${(props) => props.theme.accentColor};
+  color: ${props => props.theme.accentColor};
+  font-size: 48px;
 `;
 
 const coins = [
@@ -20,7 +44,7 @@ const coins = [
     rank: 1,
     is_new: false,
     is_active: true,
-    type: "coin",
+    type: "coin"
   },
   {
     id: "eth-ethereum",
@@ -29,7 +53,7 @@ const coins = [
     rank: 2,
     is_new: false,
     is_active: true,
-    type: "coin",
+    type: "coin"
   },
   {
     id: "hex-hex",
@@ -38,8 +62,8 @@ const coins = [
     rank: 3,
     is_new: false,
     is_active: true,
-    type: "token",
-  },
+    type: "token"
+  }
 ];
 
 const Coins = () => {
@@ -49,8 +73,10 @@ const Coins = () => {
         <Title>코인</Title>
       </Header>
       <CoinList>
-        {coins.map((coin) => (
-          <Coin key={coin.id}>{coin.name}</Coin>
+        {coins.map(coin => (
+          <Coin key={coin.id}>
+            <Link to={`/${coin.id}`}>{coin.name} &rarr;</Link>
+          </Coin>
         ))}
       </CoinList>
     </Container>
