@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import {
+  useLocation,
+  useParams,
+  Routes,
+  Route,
+  Outlet,
+} from "react-router-dom";
 import styled from "styled-components";
+import Chart from "./Chart";
+import Price from "./Price";
 
 const Container = styled.div`
   padding: 0 20px;
@@ -16,7 +24,7 @@ const Header = styled.header`
 `;
 
 const Title = styled.h1`
-  color: ${props => props.theme.accentColor};
+  color: ${(props) => props.theme.accentColor};
   font-size: 28px;
 `;
 
@@ -25,15 +33,33 @@ const Loader = styled.div`
   display: block;
 `;
 
-const Rank = styled.div`
-  color: ${props => props.theme.accentColor};
-  font-size: 28px;
-  margin-left: 20px;
+const OverView = styled.div`
+  display: flex;
+  justify-content: space-between;
+  background-color: black;
+  padding: 15px;
+  border-radius: 10px;
+`;
+
+const OverViewItem = styled.div`
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  text-align: center;
+  & > span:last-child {
+    margin-top: 10px;
+  }
+`;
+
+const Description = styled.p`
+  padding: 20px;
+  line-height: 30px;
 `;
 
 interface RouteState {
-  name: string;
-  rank: number;
+  state: {
+    name: string;
+  };
 }
 
 interface InfoData {
@@ -94,29 +120,66 @@ interface PriceData {
 const Coin = () => {
   const { coinId } = useParams();
   const [loading, setLoading] = useState(true);
-  const { name, rank } = useLocation().state as RouteState;
+  const { state } = useLocation() as RouteState;
   const [info, setInfo] = useState<InfoData>();
   const [priceInfo, setPriceInfo] = useState<PriceData>();
 
   useEffect(() => {
     (async () => {
-      const infoData = await (await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)).json();
-      const priceData = await (await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)).json();
+      const infoData = await (
+        await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
+      ).json();
+      const priceData = await (
+        await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
+      ).json();
       setInfo(infoData);
       setPriceInfo(priceData);
-
-      console.log(infoData);
-      console.log(priceData);
+      setLoading(false);
     })();
   }, [coinId]);
+  console.log(priceInfo);
 
   return (
     <Container>
       <Header>
-        <Title>{name ? `Coin: ${name}` : "Loading..."}</Title>
-        <Rank>Coin Rank: {rank}</Rank>
+        <Title>{state ? `Coin: ${state.name}` : "Loading..."}</Title>
       </Header>
-      {loading ? <Loader>loading...</Loader> : null}
+      {loading ? (
+        <Loader>loading...</Loader>
+      ) : (
+        <>
+          <Outlet />
+          <OverView>
+            <OverViewItem>
+              <span>Rank</span>
+              <span>{info?.rank}</span>
+            </OverViewItem>
+            <OverViewItem>
+              <span>Symbol</span>
+              <span>${info?.symbol}</span>
+            </OverViewItem>
+            <OverViewItem>
+              <span>Open Source</span>
+              <span>{info?.open_source ? "Yes" : "No"}</span>
+            </OverViewItem>
+          </OverView>
+          <Description>{info?.description}</Description>
+          <OverView>
+            <OverViewItem>
+              <span>Total Supply</span>
+              <span>{priceInfo?.total_supply}</span>
+            </OverViewItem>
+            <OverViewItem>
+              <span>Max Supply</span>
+              <span>{priceInfo?.max_supply}</span>
+            </OverViewItem>
+          </OverView>
+          <Routes>
+            <Route path="chart" element={<Chart />} />
+            <Route path="price" element={<Price />} />
+          </Routes>
+        </>
+      )}
     </Container>
   );
 };

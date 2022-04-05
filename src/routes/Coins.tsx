@@ -19,7 +19,7 @@ const CoinList = styled.ul``;
 
 const Coin = styled.li`
   background-color: white;
-  color: ${props => props.theme.bgColor};
+  color: ${(props) => props.theme.bgColor};
   margin-bottom: 10px;
   /* padding: 20px; */
   border-radius: 15px;
@@ -31,12 +31,12 @@ const Coin = styled.li`
     padding: 20px;
   }
   &:hover {
-    color: ${props => props.theme.accentColor};
+    color: ${(props) => props.theme.accentColor};
   }
 `;
 
 const Title = styled.h1`
-  color: ${props => props.theme.accentColor};
+  color: ${(props) => props.theme.accentColor};
   font-size: 48px;
 `;
 
@@ -84,10 +84,13 @@ const Coins = () => {
         <Loader>loading...</Loader>
       ) : (
         <CoinList>
-          {coins.map(coin => (
+          {coins.map((coin) => (
             <Coin key={coin.id}>
-              <Link to={`/${coin.id}`} state={{ name: coin.name, rank: coin.rank }}>
-                <Img src={`https://cryptocurrencyliveprices.com/img/${coin.id}.png`} alt="" />
+              <Link to={`/${coin.id}`} state={{ name: coin.name }}>
+                <Img
+                  src={`https://cryptocurrencyliveprices.com/img/${coin.id}.png`}
+                  alt=""
+                />
                 {coin.name} &rarr;
               </Link>
             </Coin>
