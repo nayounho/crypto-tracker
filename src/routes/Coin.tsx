@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "react-query";
 import {
   useLocation,
   useParams,
   Routes,
   Route,
   Outlet,
+  Link,
+  useMatch,
 } from "react-router-dom";
 import styled from "styled-components";
+import { fetchCoinInfo, fetchCoinTickers } from "../api";
 import Chart from "./Chart";
 import Price from "./Price";
 
@@ -56,11 +59,39 @@ const Description = styled.p`
   line-height: 30px;
 `;
 
+const Tabs = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+`;
+
+const Tab = styled.span<{ isActive: boolean }>`
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 400;
+  background-color: black;
+  /* padding: 10px 85px; */
+  border-radius: 10px;
+  /* cursor: pointer; */
+  color: ${(props) =>
+    props.isActive ? props.theme.accentColor : props.theme.textColor};
+
+  a {
+    display: block;
+    padding: 10px 85px;
+  }
+`;
+
 interface RouteState {
   state: {
     name: string;
   };
 }
+
+type IParams = {
+  coinId: string;
+};
 
 interface InfoData {
   id: string;
@@ -118,26 +149,20 @@ interface PriceData {
 }
 
 const Coin = () => {
-  const { coinId } = useParams();
-  const [loading, setLoading] = useState(true);
+  const { coinId } = useParams() as IParams;
   const { state } = useLocation() as RouteState;
-  const [info, setInfo] = useState<InfoData>();
-  const [priceInfo, setPriceInfo] = useState<PriceData>();
+  const priceMatch = useMatch("/:coinId/price");
+  const chartMatch = useMatch("/:coinId/chart");
 
-  useEffect(() => {
-    (async () => {
-      const infoData = await (
-        await fetch(`https://api.coinpaprika.com/v1/coins/${coinId}`)
-      ).json();
-      const priceData = await (
-        await fetch(`https://api.coinpaprika.com/v1/tickers/${coinId}`)
-      ).json();
-      setInfo(infoData);
-      setPriceInfo(priceData);
-      setLoading(false);
-    })();
-  }, [coinId]);
-  console.log(priceInfo);
+  const { isLoading: infoLoading, data: infoData } = useQuery<InfoData>(
+    ["info", coinId],
+    () => fetchCoinInfo(coinId)
+  );
+  const { isLoading: tickersLoading, data: tickersData } = useQuery<PriceData>(
+    ["tickers", coinId],
+    () => fetchCoinTickers(coinId)
+  );
+  const loading = infoLoading || tickersLoading;
 
   return (
     <Container>
@@ -152,28 +177,38 @@ const Coin = () => {
           <OverView>
             <OverViewItem>
               <span>Rank</span>
-              <span>{info?.rank}</span>
+              <span>{infoData?.rank}</span>
             </OverViewItem>
             <OverViewItem>
               <span>Symbol</span>
-              <span>${info?.symbol}</span>
+              <span>${infoData?.symbol}</span>
             </OverViewItem>
             <OverViewItem>
               <span>Open Source</span>
-              <span>{info?.open_source ? "Yes" : "No"}</span>
+              <span>{infoData?.open_source ? "Yes" : "No"}</span>
             </OverViewItem>
           </OverView>
-          <Description>{info?.description}</Description>
+          <Description>{infoData?.description}</Description>
           <OverView>
             <OverViewItem>
               <span>Total Supply</span>
-              <span>{priceInfo?.total_supply}</span>
+              <span>{tickersData?.total_supply}</span>
             </OverViewItem>
             <OverViewItem>
               <span>Max Supply</span>
-              <span>{priceInfo?.max_supply}</span>
+              <span>{tickersData?.max_supply}</span>
             </OverViewItem>
           </OverView>
+
+          <Tabs>
+            <Tab isActive={chartMatch !== null}>
+              <Link to={`/${coinId}/chart`}>chart</Link>
+            </Tab>
+            <Tab isActive={priceMatch !== null}>
+              <Link to={`/${coinId}/price`}>price</Link>
+            </Tab>
+          </Tabs>
+
           <Routes>
             <Route path="chart" element={<Chart />} />
             <Route path="price" element={<Price />} />
