@@ -9,5 +9,13 @@ export const fetchCoinInfo = (coinId: string) => {
 };
 
 export const fetchCoinTickers = (coinId: string) => {
-  return fetch(`${BASE_URL}/tichers/${coinId}`).then((res) => res.json());
+  return fetch(`${BASE_URL}/tickers/${coinId}`).then((res) => res.json());
+};
+
+export const fetchCoinHistory = (coinId: string) => {
+  const endData = Math.floor(Date.now() / 1000);
+  const startData = endData - 7 * 24 * 60 * 60;
+  return fetch(
+    `${BASE_URL}/coins/${coinId}/ohlcv/historical?start=${startData}&end=${endData}`
+  ).then((res) => res.json());
 };
