@@ -19,3 +19,9 @@ export const fetchCoinHistory = (coinId: string) => {
     `${BASE_URL}/coins/${coinId}/ohlcv/historical?start=${startData}&end=${endData}`
   ).then((res) => res.json());
 };
+
+// export const exchangeRate = async () => {
+//   const res = await fetch("http://fx.kebhana.com/FER1101M.web");
+//   const data = await res.json();
+//   return data;
+// };

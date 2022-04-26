@@ -12,6 +12,7 @@ import styled from "styled-components";
 import { fetchCoinInfo, fetchCoinTickers } from "../api";
 import Chart from "./Chart";
 import Price from "./Price";
+import { Helmet } from "react-helmet-async";
 
 const Container = styled.div`
   padding: 0 20px;
@@ -49,6 +50,7 @@ const OverViewItem = styled.div`
   flex-flow: column;
   justify-content: center;
   text-align: center;
+  color: props.theme.textColor;
   & > span:last-child {
     margin-top: 10px;
   }
@@ -151,6 +153,7 @@ interface PriceData {
 const Coin = () => {
   const { coinId } = useParams() as IParams;
   const { state } = useLocation() as RouteState;
+
   const priceMatch = useMatch("/:coinId/price");
   const chartMatch = useMatch("/:coinId/chart");
 
@@ -160,12 +163,18 @@ const Coin = () => {
   );
   const { isLoading: tickersLoading, data: tickersData } = useQuery<PriceData>(
     ["tickers", coinId],
-    () => fetchCoinTickers(coinId)
+    () => fetchCoinTickers(coinId),
+    {
+      refetchInterval: 50000,
+    }
   );
   const loading = infoLoading || tickersLoading;
 
   return (
     <Container>
+      <Helmet>
+        <title>{state ? `Coin: ${state.name}` : "Loading..."}</title>
+      </Helmet>
       <Header>
         <Title>{state ? `Coin: ${state.name}` : "Loading..."}</Title>
       </Header>
@@ -184,8 +193,8 @@ const Coin = () => {
               <span>${infoData?.symbol}</span>
             </OverViewItem>
             <OverViewItem>
-              <span>Open Source</span>
-              <span>{infoData?.open_source ? "Yes" : "No"}</span>
+              <span>Price</span>
+              <span>{tickersData?.quotes?.USD?.price?.toFixed(3)}</span>
             </OverViewItem>
           </OverView>
           <Description>{infoData?.description}</Description>
