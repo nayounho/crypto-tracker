@@ -50,8 +50,8 @@ table {
 }
 body {
 	font-family: 'Oswald', sans-serif;
-	background-color: ${props => props.theme.bgColor};
-	color: ${props => props.theme.textColor};
+	background-color: ${(props) => props.theme.bgColor};
+	color: ${(props) => props.theme.textColor};
 }
 a {
 	text-decoration: none;
